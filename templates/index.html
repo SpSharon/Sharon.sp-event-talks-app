@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BigQuery Release Notes Hub</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="logo-area">
+                <div class="logo-icon">
+                    <i class="fa-solid fa-database"></i>
+                </div>
+                <div>
+                    <h1>BigQuery</h1>
+                    <p class="subtitle">Release Notes Tracker</p>
+                </div>
+            </div>
+            
+            <div class="actions-area">
+                <button id="refresh-btn" class="btn btn-primary" title="Refresh Release Notes">
+                    <span class="btn-text">Refresh</span>
+                    <i class="fa-solid fa-rotate spinner" id="refresh-icon"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Content Area -->
+        <main class="app-main">
+            <!-- Filter & Search Controls -->
+            <section class="controls-card">
+                <div class="search-box">
+                    <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                    <input type="text" id="search-input" placeholder="Search updates...">
+                </div>
+                <div class="filters-group">
+                    <button class="filter-chip active" data-type="all">All</button>
+                    <button class="filter-chip" data-type="Feature"><i class="fa-solid fa-star"></i> Feature</button>
+                    <button class="filter-chip" data-type="Announcement"><i class="fa-solid fa-bullhorn"></i> Announcement</button>
+                    <button class="filter-chip" data-type="Bug Fix"><i class="fa-solid fa-bug"></i> Bug Fix</button>
+                    <button class="filter-chip" data-type="Deprecation"><i class="fa-solid fa-triangle-exclamation"></i> Deprecation</button>
+                    <button class="filter-chip" data-type="Update"><i class="fa-solid fa-pen-to-square"></i> General</button>
+                </div>
+            </section>
+
+            <!-- Loading State -->
+            <div id="loading-state" class="loading-container hidden">
+                <div class="skeleton-card"></div>
+                <div class="skeleton-card"></div>
+                <div class="skeleton-card"></div>
+            </div>
+
+            <!-- Error State -->
+            <div id="error-state" class="error-container hidden">
+                <i class="fa-solid fa-circle-exclamation error-icon"></i>
+                <h3>Unable to load releases</h3>
+                <p id="error-message">Something went wrong while fetching the feed.</p>
+                <button id="retry-btn" class="btn btn-secondary">Try Again</button>
+            </div>
+
+            <!-- Empty State -->
+            <div id="empty-state" class="empty-container hidden">
+                <i class="fa-solid fa-folder-open empty-icon"></i>
+                <h3>No releases found</h3>
+                <p>Try clearing your search or filter.</p>
+            </div>
+
+            <!-- Releases Container -->
+            <div id="releases-grid" class="releases-grid">
+                <!-- Cards will be dynamically injected here -->
+            </div>
+        </main>
+        
+        <footer class="app-footer">
+            <p>BigQuery Release Notes Hub &bull; Built with Flask &amp; Vanilla Web Technologies</p>
+        </footer>
+    </div>
+
+    <!-- Twitter Composer Modal -->
+    <div id="tweet-modal" class="modal-overlay hidden">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h2><i class="fa-brands fa-x-twitter"></i> Tweet about this Update</h2>
+                <button class="close-modal-btn" id="close-modal"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <p class="modal-instructions">Customize your tweet. Links and tags will automatically format.</p>
+                <div class="tweet-textarea-wrapper">
+                    <textarea id="tweet-textarea" rows="5" maxlength="280"></textarea>
+                    <div class="tweet-char-count-ring">
+                        <svg class="progress-ring" width="40" height="40">
+                            <circle class="progress-ring__circle-bg" stroke="rgba(255,255,255,0.1)" stroke-width="3" fill="transparent" r="16" cx="20" cy="20"/>
+                            <circle class="progress-ring__circle" id="char-progress" stroke="#3b82f6" stroke-width="3" fill="transparent" r="16" cx="20" cy="20"/>
+                        </svg>
+                        <span id="tweet-char-count" class="char-count-text">280</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="cancel-tweet-btn">Cancel</button>
+                <button class="btn btn-twitter" id="submit-tweet-btn">
+                    <i class="fa-brands fa-x-twitter"></i> Post Tweet
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script file -->
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
