@@ -26,6 +26,23 @@
             </div>
             
             <div class="actions-area">
+                <!-- Theme Toggle Switch -->
+                <div class="theme-toggle-container">
+                    <i class="fa-solid fa-sun icon-sun"></i>
+                    <label class="switch" title="Toggle Light/Dark Theme">
+                        <input type="checkbox" id="theme-toggle">
+                        <span class="slider round"></span>
+                    </label>
+                    <i class="fa-solid fa-moon icon-moon"></i>
+                </div>
+                
+                <!-- CSV Export Button -->
+                <button id="export-csv-btn" class="btn btn-secondary" title="Export Current View to CSV">
+                    <i class="fa-solid fa-file-csv"></i>
+                    <span class="btn-text">Export CSV</span>
+                </button>
+
+                <!-- Refresh Button -->
                 <button id="refresh-btn" class="btn btn-primary" title="Refresh Release Notes">
                     <span class="btn-text">Refresh</span>
                     <i class="fa-solid fa-rotate spinner" id="refresh-icon"></i>

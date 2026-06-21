@@ -19,6 +19,8 @@ const errorState = document.getElementById('error-state');
 const errorMessage = document.getElementById('error-message');
 const emptyState = document.getElementById('empty-state');
 const retryBtn = document.getElementById('retry-btn');
+const exportCsvBtn = document.getElementById('export-csv-btn');
+const themeToggle = document.getElementById('theme-toggle');
 
 // Modal Elements
 const tweetModal = document.getElementById('tweet-modal');
@@ -31,6 +33,7 @@ const closeModalBtn = document.getElementById('close-modal');
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
+    loadSavedTheme();
     fetchReleases();
     setupEventListeners();
     setupProgressRing();
@@ -40,6 +43,8 @@ document.addEventListener('DOMContentLoaded', () => {
 function setupEventListeners() {
     refreshBtn.addEventListener('click', fetchReleases);
     retryBtn.addEventListener('click', fetchReleases);
+    exportCsvBtn.addEventListener('click', exportToCSV);
+    themeToggle.addEventListener('change', toggleTheme);
     
     // Search input
     searchInput.addEventListener('input', (e) => {
@@ -171,6 +176,9 @@ function renderReleases(releases) {
                 </div>
             </div>
             <div class="card-actions">
+                <button class="btn-card-copy" onclick="copyToClipboard(this, ${index}, ${releases === allReleases ? 'true' : 'false'})">
+                    <i class="fa-solid fa-copy"></i> <span>Copy</span>
+                </button>
                 <button class="btn-card-tweet" onclick="openTweetComposer(${index}, ${releases === allReleases ? 'true' : 'false'})">
                     <i class="fa-brands fa-x-twitter"></i> Tweet Update
                 </button>
@@ -356,5 +364,100 @@ function formatDate(isoString) {
         });
     } catch (e) {
         return isoString;
+    }
+}
+
+// Copy update plain text to clipboard
+window.copyToClipboard = async function(btnElement, index, useAllList) {
+    const list = useAllList ? allReleases : getCurrentFilteredList();
+    const release = list[index];
+    if (!release) return;
+
+    const copyText = `BigQuery ${release.type} (${release.date}):\n${release.plain_text}`;
+
+    try {
+        await navigator.clipboard.writeText(copyText);
+        
+        // Show success animation/text change
+        const icon = btnElement.querySelector('i');
+        const span = btnElement.querySelector('span');
+        
+        btnElement.classList.add('success');
+        icon.className = 'fa-solid fa-check';
+        span.innerText = 'Copied!';
+        
+        setTimeout(() => {
+            btnElement.classList.remove('success');
+            icon.className = 'fa-solid fa-copy';
+            span.innerText = 'Copy';
+        }, 1500);
+    } catch (err) {
+        console.error('Failed to copy text: ', err);
+        alert('Failed to copy to clipboard.');
+    }
+}
+
+// Export the currently filtered & searched list to a CSV file
+function exportToCSV() {
+    const list = getCurrentFilteredList();
+    if (list.length === 0) {
+        alert("No releases to export.");
+        return;
+    }
+
+    const csvHeaders = ["Date", "Type", "Details", "Feed Link"];
+    
+    // Construct CSV Rows
+    const csvRows = [
+        csvHeaders.join(",") // Add header row
+    ];
+
+    list.forEach(item => {
+        // Escape quotes by doubling them, wrap fields in quotes
+        const dateField = `"${item.date.replace(/"/g, '""')}"`;
+        const typeField = `"${item.type.replace(/"/g, '""')}"`;
+        const detailsField = `"${item.plain_text.replace(/"/g, '""')}"`;
+        const linkField = `"${BIGQUERY_NOTES_URL}"`;
+
+        csvRows.push([dateField, typeField, detailsField, linkField].join(","));
+    });
+
+    const csvContent = csvRows.join("\n");
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    
+    // Create download link and trigger click
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    
+    const dateStamp = new Date().toISOString().slice(0, 10);
+    link.setAttribute("href", url);
+    link.setAttribute("download", `bigquery_releases_export_${dateStamp}.csv`);
+    link.style.visibility = 'hidden';
+    
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+// Theme management (Light / Dark)
+function toggleTheme(e) {
+    if (e.target.checked) {
+        document.body.classList.add('light-theme');
+        localStorage.setItem('theme', 'light');
+    } else {
+        document.body.classList.remove('light-theme');
+        localStorage.setItem('theme', 'dark');
+    }
+}
+
+function loadSavedTheme() {
+    const savedTheme = localStorage.getItem('theme');
+    
+    if (savedTheme === 'light') {
+        themeToggle.checked = true;
+        document.body.classList.add('light-theme');
+    } else {
+        themeToggle.checked = false;
+        document.body.classList.remove('light-theme');
     }
 }
